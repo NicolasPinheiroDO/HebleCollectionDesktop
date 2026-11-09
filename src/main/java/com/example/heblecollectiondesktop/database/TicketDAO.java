@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 
 import com.example.heblecollectiondesktop.model.Ticket;
 import com.example.heblecollectiondesktop.model.Tipo;
-import com.example.heblecollectiondesktop.model.status; // Ajuste para maiúscula se a sua classe for Status
+import com.example.heblecollectiondesktop.model.status;
 
 public class TicketDAO {
 

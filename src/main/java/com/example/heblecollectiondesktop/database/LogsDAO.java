@@ -19,11 +19,13 @@ public class LogsDAO {
     private static final Logger LOGGER = Logger.getLogger(LogsDAO.class.getName());
 
     private static final String SELECT_LOGS =
-            "SELECT id, funcionario_id, acao, alvo_afetado, detalhes, data_acao FROM logs_moderacao ";
+            "SELECT l.id, f.matricula AS funcionario_id, l.acao, l.alvo_afetado, l.detalhes, l.data_acao " +
+                    "FROM logs_moderacao l " +
+                    "LEFT JOIN funcionarios f ON l.autor_id = f.id ";
 
     public boolean salvar(LogModeracao log) {
-        String sql = "INSERT INTO logs_moderacao (funcionario_id, autor_id, acao, alvo_afetado, detalhes, data_acao) " +
-                "VALUES (?, (SELECT idfuncionarios FROM funcionarios WHERE matricula = ? LIMIT 1), ?, ?, ?, ?)";
+        String sql = "INSERT INTO logs_moderacao (autor_id, acao, alvo_afetado, detalhes, data_acao) " +
+                "VALUES ((SELECT id FROM funcionarios WHERE matricula = ? LIMIT 1), ?, ?, ?, ?)";
 
         String autor = log.getFuncionarioId() != null && !log.getFuncionarioId().isBlank() ? log.getFuncionarioId() : "SISTEMA";
 
@@ -31,11 +33,10 @@ public class LogsDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, autor);
-            stmt.setString(2, autor);
-            stmt.setString(3, log.getAcao() != null && !log.getAcao().isBlank() ? log.getAcao() : "N/A");
-            stmt.setString(4, log.getAlvoAfetado() != null && !log.getAlvoAfetado().isBlank() ? log.getAlvoAfetado() : "N/A");
-            stmt.setString(5, log.getDetalhes() != null ? log.getDetalhes() : "");
-            stmt.setTimestamp(6, Timestamp.valueOf(log.getDataAcao() != null ? log.getDataAcao() : LocalDateTime.now()));
+            stmt.setString(2, log.getAcao() != null && !log.getAcao().isBlank() ? log.getAcao() : "N/A");
+            stmt.setString(3, log.getAlvoAfetado() != null && !log.getAlvoAfetado().isBlank() ? log.getAlvoAfetado() : "N/A");
+            stmt.setString(4, log.getDetalhes() != null ? log.getDetalhes() : "");
+            stmt.setTimestamp(5, Timestamp.valueOf(log.getDataAcao() != null ? log.getDataAcao() : LocalDateTime.now()));
 
             return stmt.executeUpdate() > 0;
 
@@ -46,7 +47,7 @@ public class LogsDAO {
     }
 
     public List<LogModeracao> listarTodos() {
-        String sql = SELECT_LOGS + "ORDER BY data_acao DESC";
+        String sql = SELECT_LOGS + "ORDER BY l.data_acao DESC";
         List<LogModeracao> logs = new ArrayList<>();
 
         try (Connection conn = conexaoDB.getConexao();
@@ -65,15 +66,15 @@ public class LogsDAO {
     }
 
     public List<LogModeracao> buscarPorModerador(String matricula) {
-        return buscarComFiltro("funcionario_id", matricula, "moderador");
+        return buscarComFiltro("f.matricula", matricula, "moderador");
     }
 
     public List<LogModeracao> buscarPorAlvo(String alvo) {
-        return buscarComFiltro("alvo_afetado", alvo, "alvo");
+        return buscarComFiltro("l.alvo_afetado", alvo, "alvo");
     }
 
     private List<LogModeracao> buscarComFiltro(String coluna, String valor, String descricao) {
-        String sql = SELECT_LOGS + "WHERE " + coluna + " LIKE ? ORDER BY data_acao DESC";
+        String sql = SELECT_LOGS + "WHERE " + coluna + " LIKE ? ORDER BY l.data_acao DESC";
         List<LogModeracao> logs = new ArrayList<>();
 
         try (Connection conn = conexaoDB.getConexao();
@@ -125,6 +126,9 @@ public class LogsDAO {
     private LogModeracao mapearResultSetParaLog(ResultSet rs) throws SQLException {
         int id = rs.getInt("id");
         String funcionarioId = rs.getString("funcionario_id");
+        if (funcionarioId == null) {
+            funcionarioId = "SISTEMA";
+        }
         String acao = rs.getString("acao");
         String alvoAfetado = rs.getString("alvo_afetado");
         String detalhes = rs.getString("detalhes");

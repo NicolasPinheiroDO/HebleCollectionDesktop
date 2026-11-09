@@ -16,8 +16,6 @@ public class EmpresaDAO {
     private static final Logger LOGGER = Logger.getLogger(EmpresaDAO.class.getName());
 
     private static final String COLUNAS = "id, nome, cnpj, estilo, aprovado";
-
-
     private static final int ERRO_MYSQL_REGISTRO_REFERENCIADO = 1451;
 
     public List<Empresa> listarPendentes() {
@@ -97,7 +95,6 @@ public class EmpresaDAO {
         }
     }
 
-    /** NOVO (opcional): permite à tela avisar "empresa tem produtos" antes de tentar excluir. */
     public boolean possuiProdutos(int idEmpresa) {
         String sql = "SELECT 1 FROM produtos WHERE empresa_id = ? LIMIT 1";
 
