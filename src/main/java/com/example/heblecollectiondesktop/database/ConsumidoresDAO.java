@@ -161,6 +161,12 @@ public class ConsumidoresDAO {
     }
 
     public boolean atualizarStatusConsumidor(int idConsumidor, String novoStatus) {
+        if (novoStatus == null
+                || !(novoStatus.equalsIgnoreCase("Ativo") || novoStatus.equalsIgnoreCase("Banido"))) {
+            LOGGER.warning("Status inválido recebido: " + novoStatus);
+            return false;
+        }
+
         String sql = "UPDATE consumidores SET statusconsumidor = ? WHERE id = ?";
 
         try (Connection conn = conexaoDB.getConexao();
@@ -171,7 +177,10 @@ public class ConsumidoresDAO {
 
             boolean alterou = stmt.executeUpdate() > 0;
             if (alterou) {
-                LOGGER.info("Status do consumidor atualizado com sucesso!");
+                LOGGER.info("Status do consumidor " + idConsumidor + " atualizado para " + novoStatus);
+            } else {
+                LOGGER.warning("Nenhuma linha alterada ao atualizar status do consumidor " + idConsumidor
+                        + " (ID inexistente?)");
             }
             return alterou;
 
