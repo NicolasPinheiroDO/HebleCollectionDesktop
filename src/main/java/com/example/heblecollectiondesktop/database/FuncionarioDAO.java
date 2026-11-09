@@ -21,8 +21,7 @@ public class FuncionarioDAO {
 
     private static final Logger LOGGER = Logger.getLogger(FuncionarioDAO.class.getName());
 
-    private static final String COLUNAS = "idfuncionarios, matricula, senha, cargo";
-
+    private static final String COLUNAS = "id, matricula, senha, cargo";
 
     public Funcionario autenticar(String matricula, String senha) throws SQLException {
         String sql = "SELECT " + COLUNAS + " FROM funcionarios WHERE matricula = ? LIMIT 1";
@@ -40,7 +39,7 @@ public class FuncionarioDAO {
                 if (!rs.next()) {
                     return null;
                 }
-                id = rs.getInt("idfuncionarios");
+                id = rs.getInt("id");
                 armazenada = rs.getString("senha");
 
                 if (!SenhaUtil.verificar(senha, armazenada)) {
@@ -57,7 +56,7 @@ public class FuncionarioDAO {
     }
 
     private void atualizarHash(Connection conexao, int id, String hash) {
-        try (PreparedStatement stmt = conexao.prepareStatement("UPDATE funcionarios SET senha = ? WHERE idfuncionarios = ?")) {
+        try (PreparedStatement stmt = conexao.prepareStatement("UPDATE funcionarios SET senha = ? WHERE id = ?")) {
             stmt.setString(1, hash);
             stmt.setInt(2, id);
             stmt.executeUpdate();
@@ -70,12 +69,12 @@ public class FuncionarioDAO {
         Map<Integer, String> pendentes = new LinkedHashMap<>();
 
         try (Connection conn = conexaoDB.getConexao()) {
-            try (PreparedStatement stmt = conn.prepareStatement("SELECT idfuncionarios, senha FROM funcionarios");
+            try (PreparedStatement stmt = conn.prepareStatement("SELECT id, senha FROM funcionarios");
                  ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     String atual = rs.getString("senha");
                     if (atual != null && !SenhaUtil.estaEmHash(atual)) {
-                        pendentes.put(rs.getInt("idfuncionarios"), atual);
+                        pendentes.put(rs.getInt("id"), atual);
                     }
                 }
             }
@@ -86,7 +85,7 @@ public class FuncionarioDAO {
 
             try {
                 conn.setAutoCommit(false);
-                try (PreparedStatement upd = conn.prepareStatement("UPDATE funcionarios SET senha = ? WHERE idfuncionarios = ?")) {
+                try (PreparedStatement upd = conn.prepareStatement("UPDATE funcionarios SET senha = ? WHERE id = ?")) {
                     for (Map.Entry<Integer, String> e : pendentes.entrySet()) {
                         upd.setString(1, SenhaUtil.gerarHash(e.getValue()));
                         upd.setInt(2, e.getKey());
@@ -107,7 +106,7 @@ public class FuncionarioDAO {
 
     public List<Funcionario> listarTodos() throws SQLException {
         List<Funcionario> lista = new ArrayList<>();
-        String sql = "SELECT " + COLUNAS + " FROM funcionarios ORDER BY idfuncionarios DESC";
+        String sql = "SELECT " + COLUNAS + " FROM funcionarios ORDER BY id DESC";
 
         try (Connection conexao = conexaoDB.getConexao();
              PreparedStatement stmt = conexao.prepareStatement(sql);
@@ -122,7 +121,7 @@ public class FuncionarioDAO {
 
     public List<Funcionario> pesquisar(String termo) throws SQLException {
         List<Funcionario> lista = new ArrayList<>();
-        String sql = "SELECT " + COLUNAS + " FROM funcionarios WHERE matricula LIKE ? OR cargo LIKE ? ORDER BY idfuncionarios DESC";
+        String sql = "SELECT " + COLUNAS + " FROM funcionarios WHERE matricula LIKE ? OR cargo LIKE ? ORDER BY id DESC";
 
         try (Connection conexao = conexaoDB.getConexao();
              PreparedStatement stmt = conexao.prepareStatement(sql)) {
@@ -155,7 +154,7 @@ public class FuncionarioDAO {
     }
 
     public boolean atualizar(Funcionario funcionario) {
-        String sql = "UPDATE funcionarios SET matricula = ?, senha = ?, cargo = ? WHERE idfuncionarios = ?";
+        String sql = "UPDATE funcionarios SET matricula = ?, senha = ?, cargo = ? WHERE id = ?";
 
         try (Connection conn = conexaoDB.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -187,7 +186,7 @@ public class FuncionarioDAO {
     }
 
     public boolean deletar(int idFuncionarioDeletar) throws SQLException {
-        String sqlDelete = "DELETE FROM funcionarios WHERE idfuncionarios = ?";
+        String sqlDelete = "DELETE FROM funcionarios WHERE id = ?";
 
         try (Connection conn = conexaoDB.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sqlDelete)) {
@@ -198,10 +197,10 @@ public class FuncionarioDAO {
     }
 
     public boolean deletar(int idFuncionarioDeletar, String matriculaModerador, String motivo, String observacao) throws SQLException {
-        String sqlSelect = "SELECT matricula FROM funcionarios WHERE idfuncionarios = ?";
-        String sqlDelete = "DELETE FROM funcionarios WHERE idfuncionarios = ?";
+        String sqlSelect = "SELECT matricula FROM funcionarios WHERE id = ?";
+        String sqlDelete = "DELETE FROM funcionarios WHERE id = ?";
         String sqlLog = "INSERT INTO logs_moderacao (funcionario_id, autor_id, acao, alvo_afetado, detalhes, data_acao) " +
-                "VALUES (?, (SELECT idfuncionarios FROM funcionarios WHERE matricula = ? LIMIT 1), ?, ?, ?, ?)";
+                "VALUES (?, (SELECT id FROM funcionarios WHERE matricula = ? LIMIT 1), ?, ?, ?, ?)";
 
         try (Connection conn = conexaoDB.getConexao()) {
             try {
@@ -254,7 +253,7 @@ public class FuncionarioDAO {
     }
 
     private Funcionario mapear(ResultSet rs) throws SQLException {
-        int id = rs.getInt("idfuncionarios");
+        int id = rs.getInt("id");
         String mat = rs.getString("matricula");
         String pass = rs.getString("senha");
         Cargo cargo = converterCargo(rs.getString("cargo"));

@@ -3,7 +3,7 @@ package com.example.heblecollectiondesktop.controller;
 import com.example.heblecollectiondesktop.database.TicketDAO;
 import com.example.heblecollectiondesktop.model.Ticket;
 import com.example.heblecollectiondesktop.model.Tipo;
-import com.example.heblecollectiondesktop.model.status; // Ajuste para Status maiúsculo se a sua classe for com S maiúsculo
+import com.example.heblecollectiondesktop.model.status;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;

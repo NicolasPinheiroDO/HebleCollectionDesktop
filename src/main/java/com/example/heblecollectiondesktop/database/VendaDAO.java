@@ -23,7 +23,7 @@ public class VendaDAO {
             "INSERT INTO itens_venda (venda_id, produto_id, quantidade, preco_unitario) VALUES (?, ?, ?, ?)";
 
     private static final String SQL_COLUNAS_VENDA =
-            "idvenda, consumidor_id, cupom_id, valor_subtotal, valor_frete, valor_desconto, valor_total, status_venda, criado_em";
+            "id, consumidor_id, cupom_id, valor_subtotal, valor_frete, valor_desconto, valor_total, status_venda, criado_em";
 
     public boolean salvar(Venda venda) throws SQLException {
         if (venda.getItens() == null || venda.getItens().isEmpty()) {
@@ -107,11 +107,11 @@ public class VendaDAO {
 
     public List<ItemVenda> listarItensPorVenda(int vendaId) {
         List<ItemVenda> itens = new ArrayList<>();
-        String sql = "SELECT i.iditem, i.venda_id, i.produto_id, i.quantidade, i.preco_unitario, p.nome AS nome_produto " +
+        String sql = "SELECT i.id, i.venda_id, i.produto_id, i.quantidade, i.preco_unitario, p.nome AS nome_produto " +
                 "FROM itens_venda i " +
                 "JOIN produtos p ON i.produto_id = p.id " +
                 "WHERE i.venda_id = ? " +
-                "ORDER BY i.iditem";
+                "ORDER BY i.id";
 
         try (Connection conn = conexaoDB.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -120,7 +120,7 @@ public class VendaDAO {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     ItemVenda item = new ItemVenda();
-                    item.setIditem(rs.getInt("iditem"));
+                    item.setIditem(rs.getInt("id"));
                     item.setVendaId(rs.getInt("venda_id"));
                     item.setProdutoId(rs.getInt("produto_id"));
                     item.setNomeProduto(rs.getString("nome_produto"));
@@ -130,7 +130,6 @@ public class VendaDAO {
                 }
             }
         } catch (SQLException e) {
-
             LOGGER.log(Level.SEVERE, "Erro ao listar itens da venda " + vendaId, e);
         }
         return itens;
@@ -151,7 +150,6 @@ public class VendaDAO {
         return vendas;
     }
 
-    /** NOVO (opcional): versão paginada, útil quando houver muitas vendas. */
     public List<Venda> listarTodas(int limite, int deslocamento) throws SQLException {
         String sql = "SELECT " + SQL_COLUNAS_VENDA + " FROM vendas ORDER BY criado_em DESC LIMIT ? OFFSET ?";
         List<Venda> vendas = new ArrayList<>();
@@ -172,7 +170,7 @@ public class VendaDAO {
 
     private Venda mapearVenda(ResultSet rs) throws SQLException {
         Venda v = new Venda();
-        v.setIdvenda(rs.getInt("idvenda"));
+        v.setIdvenda(rs.getInt("id"));
         v.setConsumidorId(rs.getInt("consumidor_id"));
         v.setCupomId(rs.getObject("cupom_id", Integer.class));
         v.setValorSubtotal(rs.getBigDecimal("valor_subtotal"));
@@ -193,7 +191,7 @@ public class VendaDAO {
                 "FROM itens_venda i " +
                 "JOIN produtos p ON i.produto_id = p.id " +
                 "WHERE i.venda_id = ? " +
-                "ORDER BY i.iditem";
+                "ORDER BY i.id";
 
         List<String> itensTexto = new ArrayList<>();
 
@@ -218,7 +216,7 @@ public class VendaDAO {
 
     public Map<Integer, String> buscarResumosItens() {
         String sql = "SELECT i.venda_id, " +
-                "GROUP_CONCAT(CONCAT(i.quantidade, 'x ', p.nome) ORDER BY i.iditem SEPARATOR ', ') AS resumo " +
+                "GROUP_CONCAT(CONCAT(i.quantidade, 'x ', p.nome) ORDER BY i.id SEPARATOR ', ') AS resumo " +
                 "FROM itens_venda i " +
                 "JOIN produtos p ON i.produto_id = p.id " +
                 "GROUP BY i.venda_id";

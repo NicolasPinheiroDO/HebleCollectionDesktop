@@ -18,13 +18,13 @@ public class ConsumidoresDAO {
     private static final Logger LOGGER = Logger.getLogger(ConsumidoresDAO.class.getName());
 
     private static final String COLUNAS =
-            "IDconsumidor, nomconsumidor, cpfconsumidor, senhaconsumidor, emailconsumidor, " +
+            "id, nomconsumidor, cpfconsumidor, senhaconsumidor, emailconsumidor, " +
                     "celularconsumidor, cepconsumidor, enderecoconsumidor, dataNascconsumidor, statusconsumidor";
 
     private static final int ERRO_MYSQL_REGISTRO_REFERENCIADO = 1451;
 
     public List<Consumidores> listarConsumidores() {
-        String sql = "SELECT " + COLUNAS + " FROM consumidores";
+        String sql = "SELECT " + COLUNAS + " FROM consumidores ORDER BY id DESC";
         List<Consumidores> lista = new ArrayList<>();
 
         try (Connection conn = conexaoDB.getConexao();
@@ -43,7 +43,7 @@ public class ConsumidoresDAO {
     }
 
     public List<Consumidores> pesquisarPorNome(String nome) {
-        String sql = "SELECT " + COLUNAS + " FROM consumidores WHERE nomconsumidor LIKE ?";
+        String sql = "SELECT " + COLUNAS + " FROM consumidores WHERE nomconsumidor LIKE ? ORDER BY id DESC";
         List<Consumidores> lista = new ArrayList<>();
 
         try (Connection conn = conexaoDB.getConexao();
@@ -65,7 +65,7 @@ public class ConsumidoresDAO {
     }
 
     public Consumidores buscarPorId(int idConsumidor) {
-        String sql = "SELECT " + COLUNAS + " FROM consumidores WHERE IDconsumidor = ?";
+        String sql = "SELECT " + COLUNAS + " FROM consumidores WHERE id = ?";
 
         try (Connection conn = conexaoDB.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -85,7 +85,7 @@ public class ConsumidoresDAO {
     }
 
     public String buscarNomeClientePorId(int consumidorId) {
-        String sql = "SELECT nomconsumidor FROM consumidores WHERE IDconsumidor = ?";
+        String sql = "SELECT nomconsumidor FROM consumidores WHERE id = ?";
 
         try (Connection conn = conexaoDB.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -108,7 +108,7 @@ public class ConsumidoresDAO {
     }
 
     public Map<Integer, String> buscarNomesClientes() {
-        String sql = "SELECT IDconsumidor, nomconsumidor FROM consumidores";
+        String sql = "SELECT id, nomconsumidor FROM consumidores";
         Map<Integer, String> nomes = new HashMap<>();
 
         try (Connection conn = conexaoDB.getConexao();
@@ -116,7 +116,7 @@ public class ConsumidoresDAO {
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                nomes.put(rs.getInt("IDconsumidor"), rs.getString("nomconsumidor"));
+                nomes.put(rs.getInt("id"), rs.getString("nomconsumidor"));
             }
 
         } catch (SQLException e) {
@@ -129,7 +129,7 @@ public class ConsumidoresDAO {
     public void atualizar(Consumidores consumidor) {
         String sql = "UPDATE consumidores SET nomconsumidor = ?, cpfconsumidor = ?, senhaconsumidor = ?, emailconsumidor = ?, " +
                 "celularconsumidor = ?, cepconsumidor = ?, enderecoconsumidor = ?, dataNascconsumidor = ?, statusconsumidor = ? " +
-                "WHERE IDconsumidor = ?";
+                "WHERE id = ?";
 
         try (Connection conn = conexaoDB.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -161,7 +161,7 @@ public class ConsumidoresDAO {
     }
 
     public boolean atualizarStatusConsumidor(int idConsumidor, String novoStatus) {
-        String sql = "UPDATE consumidores SET statusconsumidor = ? WHERE IDconsumidor = ?";
+        String sql = "UPDATE consumidores SET statusconsumidor = ? WHERE id = ?";
 
         try (Connection conn = conexaoDB.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -182,7 +182,7 @@ public class ConsumidoresDAO {
     }
 
     public boolean deletar(int idConsumidor) {
-        String sql = "DELETE FROM consumidores WHERE IDconsumidor = ?";
+        String sql = "DELETE FROM consumidores WHERE id = ?";
 
         try (Connection conn = conexaoDB.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -204,7 +204,6 @@ public class ConsumidoresDAO {
         }
     }
 
-
     public boolean possuiVendas(int idConsumidor) {
         String sql = "SELECT 1 FROM vendas WHERE consumidor_id = ? LIMIT 1";
 
@@ -223,7 +222,7 @@ public class ConsumidoresDAO {
 
     private Consumidores mapear(ResultSet rs) throws SQLException {
         return new Consumidores(
-                rs.getInt("IDconsumidor"),
+                rs.getInt("id"),
                 rs.getString("nomconsumidor"),
                 rs.getString("cpfconsumidor"),
                 rs.getString("senhaconsumidor"),
