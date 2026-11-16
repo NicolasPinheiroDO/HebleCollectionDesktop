@@ -19,17 +19,17 @@ public class EmpresaDAO {
     private static final int ERRO_MYSQL_REGISTRO_REFERENCIADO = 1451;
 
     public List<Empresa> listarPendentes() {
-        return listar("SELECT " + COLUNAS + " FROM empresa WHERE aprovado = 0 ORDER BY id DESC",
+        return listar("SELECT " + COLUNAS + " FROM empresas WHERE aprovado = 0 ORDER BY id DESC",
                 "Erro ao listar empresas pendentes");
     }
 
     public List<Empresa> listarAprovadas() {
-        return listar("SELECT " + COLUNAS + " FROM empresa WHERE aprovado = 1 ORDER BY nome ASC",
+        return listar("SELECT " + COLUNAS + " FROM empresas WHERE aprovado = 1 ORDER BY nome ASC",
                 "Erro ao listar empresas aprovadas");
     }
 
     public List<Empresa> listarTodas() {
-        return listar("SELECT " + COLUNAS + " FROM empresa ORDER BY nome ASC",
+        return listar("SELECT " + COLUNAS + " FROM empresas ORDER BY nome ASC",
                 "Erro ao listar todas as empresas");
     }
 
@@ -43,7 +43,7 @@ public class EmpresaDAO {
     }
 
     public boolean atualizarStatusAprovacao(int id, boolean aprovado) {
-        String sql = "UPDATE empresa SET aprovado = ? WHERE id = ?";
+        String sql = "UPDATE empresas SET aprovado = ? WHERE id = ?";
 
         try (Connection conn = conexaoDB.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -58,7 +58,7 @@ public class EmpresaDAO {
     }
 
     public Empresa buscarPorId(int id) {
-        String sql = "SELECT " + COLUNAS + " FROM empresa WHERE id = ?";
+        String sql = "SELECT " + COLUNAS + " FROM empresas WHERE id = ?";
 
         try (Connection conn = conexaoDB.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -77,7 +77,7 @@ public class EmpresaDAO {
     }
 
     public boolean deletar(int idEmpresa) {
-        String sql = "DELETE FROM empresa WHERE id = ?";
+        String sql = "DELETE FROM empresas WHERE id = ?";
 
         try (Connection conn = conexaoDB.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -112,7 +112,7 @@ public class EmpresaDAO {
     }
 
     private boolean atualizarDados(int id, String nome, String cnpj, String estilo, String mensagemErro) {
-        String sql = "UPDATE empresa SET nome = ?, cnpj = ?, estilo = ? WHERE id = ?";
+        String sql = "UPDATE empresas SET nome = ?, cnpj = ?, estilo = ? WHERE id = ?";
 
         try (Connection conn = conexaoDB.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

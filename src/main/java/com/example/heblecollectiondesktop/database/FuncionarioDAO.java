@@ -24,7 +24,7 @@ public class FuncionarioDAO {
     private static final String COLUNAS = "id, matricula, senha, cargo";
 
     public Funcionario autenticar(String matricula, String senha) throws SQLException {
-        String sql = "SELECT " + COLUNAS + " FROM funcionarios WHERE matricula = ? LIMIT 1";
+        String sql = "SELECT " + COLUNAS + " FROM funcionarios WHERE matricula = ? AND ativo = 1 LIMIT 1";
 
         try (Connection conexao = conexaoDB.getConexao();
              PreparedStatement stmt = conexao.prepareStatement(sql)) {
@@ -140,14 +140,16 @@ public class FuncionarioDAO {
     }
 
     public void salvar(Funcionario funcionario) throws SQLException {
-        String sql = "INSERT INTO funcionarios (matricula, senha, cargo) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO funcionarios (nome, matricula, senha, cargo, ativo) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conexao = conexaoDB.getConexao();
              PreparedStatement stmt = conexao.prepareStatement(sql)) {
 
             stmt.setString(1, funcionario.getMatricula());
-            stmt.setString(2, SenhaUtil.prepararParaGravar(funcionario.getSenha()));
-            stmt.setString(3, funcionario.getCargo().name());
+            stmt.setString(2, funcionario.getMatricula());
+            stmt.setString(3, SenhaUtil.prepararParaGravar(funcionario.getSenha()));
+            stmt.setString(4, funcionario.getCargo().name());
+            stmt.setBoolean(5, true);
 
             stmt.executeUpdate();
         }
@@ -199,8 +201,8 @@ public class FuncionarioDAO {
     public boolean deletar(int idFuncionarioDeletar, String matriculaModerador, String motivo, String observacao) throws SQLException {
         String sqlSelect = "SELECT matricula FROM funcionarios WHERE id = ?";
         String sqlDelete = "DELETE FROM funcionarios WHERE id = ?";
-        String sqlLog = "INSERT INTO logs_moderacao (funcionario_id, autor_id, acao, alvo_afetado, detalhes, data_acao) " +
-                "VALUES (?, (SELECT id FROM funcionarios WHERE matricula = ? LIMIT 1), ?, ?, ?, ?)";
+        String sqlLog = "INSERT INTO logs_moderacao (autor_id, acao, alvo_afetado, detalhes, data_acao) " +
+                "VALUES ((SELECT id FROM funcionarios WHERE matricula = ? LIMIT 1), ?, ?, ?, ?)";
 
         try (Connection conn = conexaoDB.getConexao()) {
             try {
@@ -232,11 +234,10 @@ public class FuncionarioDAO {
 
                 try (PreparedStatement stmtLog = conn.prepareStatement(sqlLog)) {
                     stmtLog.setString(1, matriculaModerador);
-                    stmtLog.setString(2, matriculaModerador);
-                    stmtLog.setString(3, "EXCLUSAO_FUNCIONARIO");
-                    stmtLog.setString(4, alvoAfetado);
-                    stmtLog.setString(5, detalhes);
-                    stmtLog.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
+                    stmtLog.setString(2, "EXCLUSAO_FUNCIONARIO");
+                    stmtLog.setString(3, alvoAfetado);
+                    stmtLog.setString(4, detalhes);
+                    stmtLog.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
                     stmtLog.executeUpdate();
                 }
 
