@@ -96,7 +96,7 @@ public class TicketDAO {
     }
 
     public boolean Adicionar(Ticket ticket) {
-        String sql = "INSERT INTO tickets (assunto, tipo, descricao, status, funcionario_id) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO tickets (assunto, tipo, descricao, consumidor_id, status, funcionario_id) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conexao = conexaoDB.getConexao();
              PreparedStatement stmt = conexao.prepareStatement(sql)) {
@@ -104,12 +104,13 @@ public class TicketDAO {
             stmt.setString(1, ticket.getAssunto());
             stmt.setString(2, ticket.getTipo() != null ? ticket.getTipo().name() : "GERAL");
             stmt.setString(3, ticket.getDescricao());
-            stmt.setString(4, ticket.getStatus() != null ? ticket.getStatus().name() : "aberto");
+            stmt.setInt(4, 1);
+            stmt.setString(5, ticket.getStatus() != null ? ticket.getStatus().name() : "aberto");
 
             if (ticket.getFuncionarioId() > 0) {
-                stmt.setInt(5, ticket.getFuncionarioId());
+                stmt.setInt(6, ticket.getFuncionarioId());
             } else {
-                stmt.setNull(5, Types.INTEGER);
+                stmt.setNull(6, Types.INTEGER);
             }
 
             return stmt.executeUpdate() > 0;

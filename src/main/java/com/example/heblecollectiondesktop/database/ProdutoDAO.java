@@ -19,7 +19,7 @@ public class ProdutoDAO {
             "SELECT p.id, p.nome, p.descricao, p.preco, p.quantidade_estoque, p.status, p.ativo, " +
                     "COALESCE(e.nome, 'Não vinculada') AS nome_empresa " +
                     "FROM produtos p " +
-                    "LEFT JOIN empresa e ON p.empresa_id = e.id ";
+                    "LEFT JOIN empresas e ON p.empresa_id = e.id ";
 
     public List<Produto> listarTodos() {
         return consultar(SELECT_BASE + "ORDER BY p.id DESC", "Erro ao listar produtos");

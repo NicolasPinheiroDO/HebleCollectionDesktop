@@ -18,8 +18,7 @@ public class ConsumidoresDAO {
     private static final Logger LOGGER = Logger.getLogger(ConsumidoresDAO.class.getName());
 
     private static final String COLUNAS =
-            "id, nomconsumidor, cpfconsumidor, senhaconsumidor, emailconsumidor, " +
-                    "celularconsumidor, cepconsumidor, enderecoconsumidor, dataNascconsumidor, statusconsumidor";
+            "id, nome, cpf, senha, email, celular, cep, endereco, data_nascimento, status";
 
     private static final int ERRO_MYSQL_REGISTRO_REFERENCIADO = 1451;
 
@@ -43,7 +42,7 @@ public class ConsumidoresDAO {
     }
 
     public List<Consumidores> pesquisarPorNome(String nome) {
-        String sql = "SELECT " + COLUNAS + " FROM consumidores WHERE nomconsumidor LIKE ? ORDER BY id DESC";
+        String sql = "SELECT " + COLUNAS + " FROM consumidores WHERE nome LIKE ? ORDER BY id DESC";
         List<Consumidores> lista = new ArrayList<>();
 
         try (Connection conn = conexaoDB.getConexao();
@@ -85,7 +84,7 @@ public class ConsumidoresDAO {
     }
 
     public String buscarNomeClientePorId(int consumidorId) {
-        String sql = "SELECT nomconsumidor FROM consumidores WHERE id = ?";
+        String sql = "SELECT nome FROM consumidores WHERE id = ?";
 
         try (Connection conn = conexaoDB.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -93,7 +92,7 @@ public class ConsumidoresDAO {
             stmt.setInt(1, consumidorId);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    String nome = rs.getString("nomconsumidor");
+                    String nome = rs.getString("nome");
                     if (nome != null) {
                         return nome;
                     }
@@ -108,7 +107,7 @@ public class ConsumidoresDAO {
     }
 
     public Map<Integer, String> buscarNomesClientes() {
-        String sql = "SELECT id, nomconsumidor FROM consumidores";
+        String sql = "SELECT id, nome FROM consumidores";
         Map<Integer, String> nomes = new HashMap<>();
 
         try (Connection conn = conexaoDB.getConexao();
@@ -116,7 +115,7 @@ public class ConsumidoresDAO {
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                nomes.put(rs.getInt("id"), rs.getString("nomconsumidor"));
+                nomes.put(rs.getInt("id"), rs.getString("nome"));
             }
 
         } catch (SQLException e) {
@@ -127,8 +126,8 @@ public class ConsumidoresDAO {
     }
 
     public void atualizar(Consumidores consumidor) {
-        String sql = "UPDATE consumidores SET nomconsumidor = ?, cpfconsumidor = ?, senhaconsumidor = ?, emailconsumidor = ?, " +
-                "celularconsumidor = ?, cepconsumidor = ?, enderecoconsumidor = ?, dataNascconsumidor = ?, statusconsumidor = ? " +
+        String sql = "UPDATE consumidores SET nome = ?, cpf = ?, senha = ?, email = ?, " +
+                "celular = ?, cep = ?, endereco = ?, data_nascimento = ?, status = ? " +
                 "WHERE id = ?";
 
         try (Connection conn = conexaoDB.getConexao();
@@ -167,7 +166,7 @@ public class ConsumidoresDAO {
             return false;
         }
 
-        String sql = "UPDATE consumidores SET statusconsumidor = ? WHERE id = ?";
+        String sql = "UPDATE consumidores SET status = ? WHERE id = ?";
 
         try (Connection conn = conexaoDB.getConexao();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -232,15 +231,15 @@ public class ConsumidoresDAO {
     private Consumidores mapear(ResultSet rs) throws SQLException {
         return new Consumidores(
                 rs.getInt("id"),
-                rs.getString("nomconsumidor"),
-                rs.getString("cpfconsumidor"),
-                rs.getString("senhaconsumidor"),
-                rs.getString("emailconsumidor"),
-                rs.getString("celularconsumidor"),
-                rs.getString("cepconsumidor"),
-                rs.getString("enderecoconsumidor"),
-                rs.getString("dataNascconsumidor"),
-                rs.getString("statusconsumidor")
+                rs.getString("nome"),
+                rs.getString("cpf"),
+                rs.getString("senha"),
+                rs.getString("email"),
+                rs.getString("celular"),
+                rs.getString("cep"),
+                rs.getString("endereco"),
+                rs.getString("data_nascimento"),
+                rs.getString("status")
         );
     }
 }
